@@ -90,8 +90,18 @@ let rec month_range (day1 : int) (day2 : int) : int list =
 let rec oldest (dates : (int * (int * int)) list) : (int * (int * int)) option =
   raise Unimplemented
 
+let rec cumulative_helper (xs: int list) (xs': int list ) : int list= 
+        if xs = [] then 
+                if xs' = [] then xs'
+                else  (cumulative_helper xs (List.tl xs' ) )@ [List.hd xs']
+        else if xs' = [] then cumulative_helper (List.tl xs) (List.hd xs :: xs') 
+        else cumulative_helper  (List.tl xs) ((List.hd xs )+ (List.hd xs' ) :: xs') 
+
+
+                
 (* 12 *)
-let cumulative_sum (xs : int list) : int list = raise Unimplemented
+let cumulative_sum (xs : int list) : int list = cumulative_helper xs [];;
+
 
 (**
  * Challenge Problems
