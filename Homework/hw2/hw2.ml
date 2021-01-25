@@ -29,18 +29,21 @@ let make_silly_json (i: int) : json =
                 else match  xs with 
                         Array ss ->  make_silly_json_helper (i-1) (Array (Object [("n", Num (float_of_int i));("b", True)] :: ss ))
                         | _ -> failwith "illegal argument exception"
-        in make_silly_json_helper i (Array [ Object [] ]);;
+        in make_silly_json_helper i (Array []);;
 
 
 (* Part 2: Processing JSON values *)
 (* Don't forget to write a comment for problems 7 and 20. *)
 (* 2 *)
 let rec concat_with (sep : string) (ss : string list) : string =
-  failwith "Need to implement:  concat_with"
+        match ss with 
+                [] -> ""
+              | s :: [] -> s
+              | s :: rest -> s ^ sep ^ (concat_with sep rest)
 
 (* 3 *)
 let quote_string (s : string) : string =
-  failwith "Need to implement:  quote_string"
+        "\"" ^ s ^ "\""
 
 (* OCaml's string_of_float is not quite RFC compliant due to its tendency
    to output whole numbers with trailing decimal points without a zero.
@@ -68,8 +71,7 @@ let rec assoc (k : 'a) (xs: ('a * 'b) list) : 'b option =
   failwith "Need to implement: assoc"
 
 (* 9 *)
-let dot (j: json) (f: string) : json option =
-  failwith "Need to implement: dot"
+let dot (j: json) (f: string) : json option = None
 
 (* 10 *)
 let rec dots (j: json) (fs: string list) : json option =
@@ -152,7 +154,7 @@ let histogram_for_access_path (fs: string list) (js: json list) : (string * int)
 let complete_bus_positions_list =
   match (dot complete_bus_positions "entity") with
   | Some (Array l) -> l
-  | _ -> failwith "complete_bus_positions_list"
+  | _ -> []
 
 exception Unimplemented
 let route_histogram     = Unimplemented
