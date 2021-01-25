@@ -52,8 +52,50 @@ let json_string_of_float (f : float) : string =
   Printf.sprintf "%g" f
 
 (* 4 *)
+  (*Array [ Object [("n" , 1), ("b", True)] ; Object [("n" , 1), ("b", True)] ]*)
 let rec string_of_json (j : json) : string =
-  failwith "Need to implement:  string_of_json"
+        let  rec jsArray_to_list  ( ll: json list ) : string list = 
+                match  ll with 
+                        [] -> []
+                        | h :: ll' -> (string_of_json h) :: (jsArray_to_list ll')
+        in
+        let rec jsObject_to_list (ll : (string * json) list)  : string list = 
+                match ll with 
+                        [] -> []
+
+                        | h :: rest -> (
+                                let (str, js_obj) = h in 
+                                (("\"" ^ str ^ "\":" )  ^ (string_of_json js_obj)) :: (jsObject_to_list rest )
+        )
+
+                in
+        match j with
+                Num n -> json_string_of_float n
+              | String s -> ("\"" ^s ^ "\"" )
+              | False -> "false"
+              | True -> "true"
+              | Null -> "null"
+              | Array arr ->  "[" ^ (concat_with "," (jsArray_to_list arr)) ^ "]"
+              | Object obj_list ->   "{" ^ (concat_with "," (jsObject_to_list obj_list)) ^ "}"
+(*
+ *
+ *              | Object obj_list ->  
+ *                              ( "[" ^ (
+ *                              match obj_list with 
+ *                              [] -> ""
+ *                             | obj :: [] -> (
+ *                                     let (str, js_obj) = obj in 
+ *                                     "{" ^ "\"" ^str ^"\""^ ":" ^ (string_of_json js_obj) ^"}"
+ *                                     
+ *                                )
+ *                             | obj :: rest -> ( 
+ *                                     let (str, js_obj) = obj in 
+ *                                     "{" ^ "\"" ^str ^"\""^ ":" ^ (string_of_json js_obj) ^"},"
+ *
+ *                         )
+ *                              ) ^"]")
+ *)
+
 
 (* 5 *)
 let rec take (n: int) (l: 'a list) : 'a list =
