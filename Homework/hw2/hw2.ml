@@ -212,7 +212,23 @@ let rec string_values_for_access_path (fs : string list) (js : json list) :
 (* 16 *)
 let rec filter_access_path_value (fs : string list) (value : string)
     (js : json list) : json list =
-  failwith "Need to implement: filter_access_path_value"
+            match js with 
+                | [] -> []
+                | h :: js' -> (
+                        let res = dots  h fs in 
+                        match res with 
+                              | Some s -> ( 
+                                      match s with 
+                                      |String s -> (if s = value then h :: filter_access_path_value fs value js'
+                                                        else filter_access_path_value fs value js'
+                                                        )
+                                      | _ -> filter_access_path_value fs value js'
+
+
+                                        )
+                              | None -> filter_access_path_value fs value js'
+
+                                )
 
 (* Types for use in problems 17-20. *)
 type rect = {
@@ -226,16 +242,56 @@ type point = { latitude : float; longitude : float }
 
 (* 17 *)
 let in_rect (r : rect) (p : point) : bool =
-  failwith "Need to implement: in_rect"
+        let lat = p.latitude  in 
+        let long = p.longitude in 
+        (lat >= r.min_latitude) && (lat <= r.max_latitude) && (long <= r.max_longitude) && (long >= r.min_longitude)
+
 
 (* 18 *)
 let point_of_json (j : json) : point option =
-  failwith "Need to implement: point_of_json"
+         match (dot j "latitude" ) with 
+                        |Some a -> 
+                                        (match a with 
+                                        | Num a_num -> (
+                                                let long = dot j "longitude" in
+                                                    match long with 
+                                                      | Some b ->  (
+                                                              match b with 
+                                                              | Num b_num -> Some {latitude= a_num; longitude = b_num}
+                                                                 | _ -> None
+         )
+                                                      | None -> None
+         )
+                                        | _ -> None )
+                       | None -> None 
 
 (* 19 *)
 let rec filter_access_path_in_rect (fs : string list) (r : rect)
     (js : json list) : json list =
-  failwith "Need to implement: filter_access_path_in_rect"
+            match js with 
+            | [] -> [] 
+            | h :: rest -> (
+                    match h with 
+                        | Object obj -> (
+                                let v = dots h fs in 
+                                match v with 
+                                        | Some v_obj -> (
+                                                let v_pt = point_of_json v_obj in 
+                                                match v_pt with 
+                                                  | Some pt -> (
+                                                           
+                                                          if (in_rect r pt)  then h :: (filter_access_path_in_rect fs r rest)
+                                                          else filter_access_path_in_rect fs r rest
+
+                                                        )
+                                                  | None -> (filter_access_path_in_rect fs r rest)
+
+    )
+                                        | None ->  filter_access_path_in_rect fs r rest
+    )
+
+                        | _ ->  filter_access_path_in_rect fs r rest
+    )
 
 (* Part 3: Analyzing the data *)
 
