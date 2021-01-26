@@ -104,42 +104,110 @@ let rec assoc (kba : 'a) (xs : ('a * 'b) list) : 'b option =
       if p1 = kba then Some p2 else assoc kba rest
 
 (* 9 *)
-let dot (j : json) (f : string) : json option = 
-        match j with 
-        Object obj_list -> (assoc f obj_list)
-        | _ -> None
+let dot (j : json) (f : string) : json option =
+  match j with Object obj_list -> assoc f obj_list | _ -> None
 
 (* 10 *)
 let rec dots (j : json) (fs : string list) : json option =
-        match fs with
-                [] -> None
-        | h :: [] -> dot j h
-        | h :: rest -> (
-                let j_response = dot j h in 
-                match j_response with 
-                       None -> None 
-                        |  Some a  -> (dots a rest)
-        )
+  match fs with
+  | [] -> None
+  | [ h ] -> dot j h
+  | h :: rest -> (
+      let j_response = dot j h in
+      match j_response with None -> None | Some a -> dots a rest)
 
 (* 11 *)
+
+
 let one_fields (j : json) : string list =
-  failwith "Need to implement: one_fields"
+  let rec gather_obj_keys (js : json) =
+    match js with
+    | Object obj_list -> (
+        match obj_list with
+        | [] -> []
+        | h :: rest ->
+            let k, v = h in
+            k :: gather_obj_keys (Object rest))
+    | _ -> []
+  in
+
+  gather_obj_keys j
 
 (* 12 *)
-let no_repeats (xs : 'a list) : bool = failwith "Need to implement: no_repeats"
+let no_repeats (xs : 'a list) : bool =
+  let xs' = dedup xs in
+  if List.length xs' = List.length xs then true else false
+
+(*
+ *let rec dfs (js : json) : string list=
+ *  match js with
+ *  | Object js_obj_list -> (
+ *      match js_obj_list with
+ *      | [] -> []
+ *      | h :: rest -> (
+ *          let k, v = h in
+ *          match v with
+ *          | Object v_list -> dfs v @ (k :: dfs (Object rest))
+ *          | _ -> k :: dfs (Object rest)))
+ *  | Array js_array -> (
+ *      match js_array with [] -> [] | h :: rest -> dfs h @ dfs (Array rest))
+ *  | _ -> []
+ *)
 
 (* 13 *)
 let rec recursive_no_field_repeats (j : json) : bool =
-  failwith "Need to implement: recursive_no_field_repeats"
+        let rec dfs (js : json) : string list=
+    match js with
+    | Object js_obj_list -> (
+        match js_obj_list with
+        | [] -> []
+        | h :: rest -> (
+            let k, v = h in
+            match v with
+            | Object v_list -> (dfs v )@ (k :: dfs (Object rest))
+            | Array v_array ->( dfs v) @ (k :: dfs (Object rest))
+            | _ -> k :: dfs (Object rest)))
+    | Array js_array -> (
+        match js_array with 
+                |  [] -> [] 
+                | h :: rest -> dfs h @ dfs (Array rest))
+    | _ -> []
+  in
+  let names = dfs j in no_repeats names
 
 (* 14 *)
 let count_occurrences (xs : 'a list) (e : exn) : (string * int) list =
-  failwith "Need to implement: count_occurrences"
+        let rec count (xs : string list)  (str: string) (num : int) : ( string * int ) list = 
+                match xs with 
+                        | [] ->   [(str, num)]
+
+                        | h :: rest -> (
+                                if str = h then count rest str (num+1)
+                                else  if str < h then (str, num) ::  (count rest h 1)
+                                else raise e
+                        )
+  in match xs with 
+       | [] -> []
+       | h :: xs' -> count xs' h 1
+        
+        
 
 (* 15 *)
 let rec string_values_for_access_path (fs : string list) (js : json list) :
     string list =
-  failwith "Need to implement: string_values_for_access_path"
+            match js with 
+                | [] -> []
+                | j :: js' -> (
+                        let response  = dots j fs in 
+                        match response with 
+                                | Some a -> (
+                                        match a with 
+                                        |String s -> s :: string_values_for_access_path fs js'
+                                        | _ -> string_values_for_access_path fs js'
+                                
+)
+                                | None -> string_values_for_access_path fs js'
+)
 
 (* 16 *)
 let rec filter_access_path_value (fs : string list) (value : string)
